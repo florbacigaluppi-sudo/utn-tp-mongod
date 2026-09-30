@@ -12,3 +12,20 @@ const connectDb = async (URI : string) => {
     
 }
 connectDb(URI_DB)
+
+
+interface IBook{
+    title: string
+    author: string
+    stock: number
+    price: number
+}
+
+const bookSchema = new mongoose.Schema({
+    title: String,
+    author: String,
+    stock: Number,
+    price: Number
+})
+
+const Product = mongoose.model("book", bookSchema)
