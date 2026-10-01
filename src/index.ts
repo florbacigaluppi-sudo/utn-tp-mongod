@@ -133,6 +133,54 @@ const createBook = async (data: string []) => {
     }
 }
 
+const updateBook = async (id: string | undefined, updates: string[]) => {
+  try {
+    const data: Partial<IBook> = {}
+
+    if (!id) { throw generateError("ID is required", "InvalidData") }
+
+    for (const update of updates) {
+      const [prop, value] = update.split("=")
+
+      if (!value) {
+        throw generateError(`Invalid data for ${prop}`, "InvalidData")
+      }
+
+      switch (prop) {
+        case "title":
+          data.title= value
+          break
+        case "price":
+          data.price = +value
+          break
+        case "stock":
+          data.stock = +value
+          break
+        case "author":
+          data.author = value
+          break
+        default:
+          throw generateError("Invalid data to update a new book", "InvalidData")
+      }
+    }
+
+  const updatedBook = await Book.findByIdAndUpdate(
+      id,
+      data,
+      { new: true }
+    )
+
+    if (!updatedBook) {
+      throw generateError("Book not found", "BookNotFound")
+    }
+
+    return updatedBook
+
+  } catch (error) {
+    const e = error as Error
+    return handleError(e)
+  }
+}
 
 
 
@@ -153,6 +201,8 @@ const main = async () => {
         case "delete": console.log(await deleteBook(args[1]))
         break
         case "create" : console.log(await createBook(args.splice(1)))
+        break
+        case "update" : console.log(await updateBook(args[1], args.splice(2)))
         break
     
     default:
