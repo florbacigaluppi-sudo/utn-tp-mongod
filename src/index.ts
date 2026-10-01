@@ -65,10 +65,25 @@ const getBooks = async (id: string | undefined) =>{
         const e = error as Error
          return handleError (e) 
     }
-
-
 }
 
+const deleteBook = async (id: string | undefined) => {
+  try {
+    if (!id) {
+      await Book.deleteMany({})
+      return "Books deleted succefully"
+    }
+
+    const deletedBook = await Book.findByIdAndDelete(id)
+
+    if (!deletedBook) throw generateError("Book not found", "BookNotFound")
+
+    return deletedBook
+  } catch (error) {
+    const e = error as Error
+    return handleError(e)
+  }
+}
 
 
 
@@ -85,6 +100,8 @@ const main = async () => {
             `)
         break
         case "show" : console.log(await getBooks(args[1]))
+        break
+         case "delete": console.log(await deleteBook(args[1]))
         break
     
     default:
