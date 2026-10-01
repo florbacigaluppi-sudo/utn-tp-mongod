@@ -46,6 +46,10 @@ const handleError = (error : Error) =>{
         if (error.name === "BookNotFound"){
             return error.message
         }
+
+        if (error.name === "InvalidData") {
+        return error.message
+        }
 }
 
 const getBooks = async (id: string | undefined) =>{
@@ -85,6 +89,51 @@ const deleteBook = async (id: string | undefined) => {
   }
 }
 
+const createBook = async (data: string []) => {
+    try{
+    const newBook: IBook = {
+    title: "libro",  
+    author: "no especifica",
+    stock: 0,
+    price: 0,
+    }
+
+    if (data[0]?.split("=")[0] !=="title" || !data[0]?.split("=")[1]){
+        console.log("Title is required")
+        return
+    }
+
+    for (let i=0; i < data.length; i++) {
+        const prop= data[i]?.split("=") as string []
+        const nameProp = prop [0]
+        const value = prop [1]
+
+        switch (nameProp){
+            case "title": 
+            newBook.title = String(value)
+            break
+            case "price": 
+            newBook.price = value ? Number (value) : newBook.price
+            break
+            case "stock": 
+            newBook.stock = value ?  Number (value) : newBook.stock
+            break
+            case "author":
+            newBook.author = value ? value : newBook.author
+            break
+            default: 
+            throw generateError("Invalid data to create a new book", "InvalidData")
+        }
+
+    }
+        return await Book.create(newBook)
+    } catch (error){
+        const e = error as Error
+        return handleError(e)
+    }
+}
+
+
 
 
 const main = async () => {
@@ -92,7 +141,7 @@ const main = async () => {
 
     switch(action) {
         case "info": console.log(`
-            show - para leer todos los libros
+            show - para mostrar todos los libros
             show id - para buscar un libro por su Id
             create - para sumar un libro a la base de datos
             update - para actualizar la información de un libro
@@ -101,7 +150,9 @@ const main = async () => {
         break
         case "show" : console.log(await getBooks(args[1]))
         break
-         case "delete": console.log(await deleteBook(args[1]))
+        case "delete": console.log(await deleteBook(args[1]))
+        break
+        case "create" : console.log(await createBook(args.splice(1)))
         break
     
     default:
